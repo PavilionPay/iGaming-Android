@@ -1,3 +1,4 @@
+import com.android.build.api.dsl.ApplicationBuildType
 import java.util.Properties
 
 plugins {
@@ -21,40 +22,18 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-
-        val properties = Properties()
-        properties.load(project.rootProject.file("local.properties").inputStream())
-        buildConfigField(
-            type = "String",
-            name = "JWT_SECRET",
-            value = "\"${properties.getProperty("JWT_SECRET")}\"",
-        )
-        buildConfigField(
-            type = "String",
-            name = "JWT_ISSUER",
-            value = "\"${properties.getProperty("JWT_ISSUER")}\"",
-        )
-        buildConfigField(
-            type = "String",
-            name = "JWT_AUDIENCE",
-            value = "\"${properties.getProperty("JWT_AUDIENCE")}\"",
-        )
-        buildConfigField(
-            type = "String",
-            name = "REDIRECT_URL",
-            value = "\"${properties.getProperty("REDIRECT_URL")}\"",
-        )
-        buildConfigField(
-            type = "String",
-            name = "APP_CENTER_SECRET",
-            value = "\"${properties.getProperty("APP_CENTER_SECRET")}\"",
-        )
     }
 
     buildTypes {
+        debug {
+            val properties = Properties()
+            properties.load(project.rootProject.file("local.properties").inputStream())
+            localPropertiesConfig(properties)
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            envVarPropertiesConfig()
         }
     }
     compileOptions {
@@ -118,4 +97,60 @@ dependencies {
     val appCenterSdkVersion = "4.4.5"
     implementation("com.microsoft.appcenter:appcenter-analytics:$appCenterSdkVersion")
     implementation("com.microsoft.appcenter:appcenter-crashes:$appCenterSdkVersion")
+}
+
+fun ApplicationBuildType.localPropertiesConfig(properties: Properties) {
+    buildConfigField(
+        type = "String",
+        name = "JWT_SECRET",
+        value = "\"${properties.getProperty("JWT_SECRET")}\"",
+    )
+    buildConfigField(
+        type = "String",
+        name = "JWT_ISSUER",
+        value = "\"${properties.getProperty("JWT_ISSUER")}\"",
+    )
+    buildConfigField(
+        type = "String",
+        name = "JWT_AUDIENCE",
+        value = "\"${properties.getProperty("JWT_AUDIENCE")}\"",
+    )
+    buildConfigField(
+        type = "String",
+        name = "REDIRECT_URL",
+        value = "\"${properties.getProperty("REDIRECT_URL")}\"",
+    )
+    buildConfigField(
+        type = "String",
+        name = "APP_CENTER_SECRET",
+        value = "\"${properties.getProperty("APP_CENTER_SECRET")}\"",
+    )
+}
+
+fun ApplicationBuildType.envVarPropertiesConfig() {
+    buildConfigField(
+        type = "String",
+        name = "JWT_SECRET",
+        value = "\"${System.getenv("JWT_SECRET")}\"",
+    )
+    buildConfigField(
+        type = "String",
+        name = "JWT_ISSUER",
+        value = "\"${System.getenv("JWT_ISSUER")}\"",
+    )
+    buildConfigField(
+        type = "String",
+        name = "JWT_AUDIENCE",
+        value = "\"${System.getenv("JWT_AUDIENCE")}\"",
+    )
+    buildConfigField(
+        type = "String",
+        name = "REDIRECT_URL",
+        value = "\"${System.getenv("REDIRECT_URL")}\"",
+    )
+    buildConfigField(
+        type = "String",
+        name = "APP_CENTER_SECRET",
+        value = "\"${System.getenv("APP_CENTER_SECRET")}\"",
+    )
 }
