@@ -44,6 +44,11 @@ android {
             name = "REDIRECT_URL",
             value = "\"${properties.getProperty("REDIRECT_URL")}\"",
         )
+        buildConfigField(
+            type = "String",
+            name = "APP_CENTER_SECRET",
+            value = "\"${properties.getProperty("APP_CENTER_SECRET")}\"",
+        )
     }
 
     buildTypes {
@@ -109,4 +114,8 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    val appCenterSdkVersion = "4.4.5"
+    implementation("com.microsoft.appcenter:appcenter-analytics:$appCenterSdkVersion")
+    implementation("com.microsoft.appcenter:appcenter-crashes:$appCenterSdkVersion")
 }

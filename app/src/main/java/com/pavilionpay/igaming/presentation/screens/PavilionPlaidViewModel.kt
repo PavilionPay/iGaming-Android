@@ -39,7 +39,7 @@ class PavilionPlaidViewModel(
             _patronSessionUrlState.update {
                 it.copy(
                     patronSessionUrl = url ?: "",
-                    partonSessionRedirectUrl = if (url.isNullOrBlank()) "" else redirectUrl,
+                    patronSessionRedirectUrl = if (url.isNullOrBlank()) "" else redirectUrl,
                 )
             }
         }
@@ -125,7 +125,7 @@ class PavilionPlaidViewModel(
         _patronSessionUrlState.update {
             it.copy(
                 patronSessionUrl = "",
-                partonSessionRedirectUrl = "",
+                patronSessionRedirectUrl = "",
             )
         }
     }

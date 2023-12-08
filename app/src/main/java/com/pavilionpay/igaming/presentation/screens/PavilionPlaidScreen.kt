@@ -23,7 +23,7 @@ fun PavilionPlaidScreen(
     if (patronSessionUrls.patronSessionUrl.isNotBlank()) {
         PavilionPlaidWebView(
             url = patronSessionUrls.patronSessionUrl,
-            redirectUrl = patronSessionUrls.partonSessionRedirectUrl,
+            redirectUrl = patronSessionUrls.patronSessionRedirectUrl,
             onClose = {
                 viewModel.clearPatronSession()
                 navController.navigate(NavigationScreens.Landing.route)
