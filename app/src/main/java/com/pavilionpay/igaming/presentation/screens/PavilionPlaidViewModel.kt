@@ -90,8 +90,8 @@ class PavilionPlaidViewModel(
                 "existing" -> {
                     val payload = ExistingPatronRequestDto(
                         patronID = "cb7c887d-6687-4aa5-a664-31cf6c810df7",
-                        vipCardNumber = "7210645917",
-                        dateOfBirth = "5/28/1974",
+                        vipCardNumber = "7210903859",
+                        dateOfBirth = "11/30/1993",
                         remainingDailyDeposit = 999.99,
                         walletBalance = 1000.0,
                         transactionID = UUID.randomUUID().toString().replace("-", "").substring(1..24),
