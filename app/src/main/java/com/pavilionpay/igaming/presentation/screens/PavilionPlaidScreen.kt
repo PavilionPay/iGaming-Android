@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.pavilionpay.igaming.di.AppModule
 import com.pavilionpay.igaming.presentation.viewModelFactory
 import com.pavilionpay.igamingkit.PavilionPlaidWebView
@@ -12,7 +11,7 @@ import com.pavilionpay.igamingkit.PavilionPlaidWebView
 @Composable
 fun PavilionPlaidScreen(
     appModule: AppModule,
-    navController: NavController,
+    onCurrentScreenChange: (NavigationScreens) -> Unit,
 ) {
     val viewModel: PavilionPlaidViewModel = viewModel(
         factory = viewModelFactory { appModule.pavilionPlaidViewModel },
@@ -26,7 +25,7 @@ fun PavilionPlaidScreen(
             redirectUrl = patronSessionUrls.patronSessionRedirectUrl,
             onClose = {
                 viewModel.clearPatronSession()
-                navController.navigate(NavigationScreens.Landing.route)
+                onCurrentScreenChange(NavigationScreens.Landing)
             },
         )
     }

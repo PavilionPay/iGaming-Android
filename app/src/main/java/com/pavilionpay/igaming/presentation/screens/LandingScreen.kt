@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import com.pavilionpay.igaming.di.AppModule
 import com.pavilionpay.igaming.presentation.viewModelFactory
 import java.text.NumberFormat
@@ -41,7 +40,7 @@ import java.text.NumberFormat
 @Composable
 fun LandingScreen(
     appModule: AppModule,
-    navController: NavHostController,
+    onCurrentScreenChange: (NavigationScreens) -> Unit,
 ) {
     val viewModel: PavilionPlaidViewModel = viewModel(
         factory = viewModelFactory { appModule.pavilionPlaidViewModel },
@@ -161,15 +160,12 @@ fun LandingScreen(
         val context = LocalContext.current
         Button(
             onClick = {
+                onCurrentScreenChange(NavigationScreens.PavilionPlaid)
                 viewModel.initializePatronSession(
                     patronType = patronType,
                     amount = transactionAmount.toFloat(),
                     mode = transactionType,
                     packageName = context.packageName,
-                )
-
-                navController.navigate(
-                    NavigationScreens.PavilionPlaid.route,
                 )
             },
             shape = RoundedCornerShape(8.dp),
