@@ -113,7 +113,7 @@ fun LandingScreen(
             )
 
             RadioButtons(
-                items = mapOf("Deposit" to "deposit", "Withdrawal" to "withdrawal"),
+                items = mapOf("Deposit" to "deposit", "Withdrawal" to "withdraw"),
                 defaultSelect = transactionType,
                 onSelect = { transactionType = it },
                 modifier = Modifier.constrainAs(radioTransaction) {

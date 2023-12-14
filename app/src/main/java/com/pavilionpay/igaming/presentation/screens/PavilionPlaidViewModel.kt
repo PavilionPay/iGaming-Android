@@ -60,7 +60,7 @@ class PavilionPlaidViewModel(
                         firstName = "Jane",
                         middleInitial = "",
                         lastName = "Public",
-                        dateOfBirth = "01/22/1981",
+                        dateOfBirth = "07/03/1964",
                         email = "Jane@Jane.com",
                         mobilePhone = "3023492103",
                         streetName = "1301 E Main ST",
@@ -68,9 +68,8 @@ class PavilionPlaidViewModel(
                         state = "IL",
                         zip = "62901",
                         country = "USA",
-                        idType = "DL",
-                        idNumber = "P7948777775", // 5 for new
-                        idState = "IL",
+                        idType = "SS",
+                        idNumber = "451456789",
                         routingNumber = "",
                         accountNumber = "",
                         walletBalance = "1000",
@@ -90,8 +89,8 @@ class PavilionPlaidViewModel(
                 "existing" -> {
                     val payload = ExistingPatronRequestDto(
                         patronID = "cb7c887d-6687-4aa5-a664-31cf6c810df7",
-                        vipCardNumber = "7210903859",
-                        dateOfBirth = "11/30/1993",
+                        vipCardNumber = "7210536159",
+                        dateOfBirth = "07/03/1964",
                         remainingDailyDeposit = 999.99,
                         walletBalance = 1000.0,
                         transactionID = UUID.randomUUID().toString().replace("-", "").substring(1..24),

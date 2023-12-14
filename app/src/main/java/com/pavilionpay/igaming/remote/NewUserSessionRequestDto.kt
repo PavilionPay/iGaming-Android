@@ -18,7 +18,7 @@ data class NewUserSessionRequestDto(
     val country: String,
     val idType: String,
     val idNumber: String,
-    val idState: String,
+    val idState: String? = "",
     val routingNumber: String,
     val accountNumber: String,
     val walletBalance: String,
