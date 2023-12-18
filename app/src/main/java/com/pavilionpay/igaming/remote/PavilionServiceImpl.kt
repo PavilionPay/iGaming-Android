@@ -24,6 +24,7 @@ class PavilionServiceImpl(
      * @return A Resource containing the response data or an error.
      */
     override suspend fun initializePatronSession(
+        productType: String,
         patronType: String,
         mode: String,
         newUserSessionRequest: NewUserSessionRequestDto,
@@ -40,6 +41,7 @@ class PavilionServiceImpl(
      * @return A Resource containing the response data or an error.
      */
     override suspend fun initializePatronSession(
+        productType: String,
         patronType: String,
         mode: String,
         existingUserSessionRequest: ExistingPatronRequestDto,

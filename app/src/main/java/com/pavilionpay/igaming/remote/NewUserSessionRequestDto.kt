@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class NewUserSessionRequestDto(
+    val patronType: String,
     val patronId: String,
     val firstName: String,
     val middleInitial: String,

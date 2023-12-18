@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pavilionpay.igaming.BuildConfig
 import com.pavilionpay.igaming.core.Resource
+import com.pavilionpay.igaming.domain.ProductType
 import com.pavilionpay.igaming.remote.ExistingPatronRequestDto
 import com.pavilionpay.igaming.remote.HttpRoutes
 import com.pavilionpay.igaming.remote.NewUserSessionRequestDto
@@ -24,6 +25,7 @@ class PavilionPlaidViewModel(
     val patronSessionUrlState: StateFlow<PavilionPlaidState> = _patronSessionUrlState
 
     fun initializePatronSession(
+        productType: String,
         patronType: String,
         amount: Float,
         mode: String,
@@ -31,6 +33,7 @@ class PavilionPlaidViewModel(
     ) {
         viewModelScope.launch {
             val url = queryServiceForSession(
+                productType = productType,
                 patronType = patronType,
                 amount = amount,
                 mode = mode,
@@ -46,6 +49,7 @@ class PavilionPlaidViewModel(
     }
 
     private suspend fun queryServiceForSession(
+        productType: String,
         patronType: String,
         amount: Float,
         mode: String,
@@ -56,6 +60,8 @@ class PavilionPlaidViewModel(
             val patronResponseDtoResult = when (patronType) {
                 "new" -> {
                     val payload = NewUserSessionRequestDto(
+                        productType = productType,
+                        patronType = patronType,
                         patronId = UUID.randomUUID().toString(),
                         firstName = "Jane",
                         middleInitial = "",
@@ -77,30 +83,53 @@ class PavilionPlaidViewModel(
                         transactionId = UUID.randomUUID().toString().replace("-", "").substring(1..24),
                         transactionAmount = amount,
                         returnURL = redirectUrl,
-                        productType = "preferred",
                         androidPackageName = packageName,
                     )
                     pavilionService.initializePatronSession(
+                        productType = productType,
                         patronType = patronType,
                         mode = mode,
                         newUserSessionRequest = payload,
                     )
                 }
                 "existing" -> {
-                    val payload = ExistingPatronRequestDto(
-                        patronID = "cb7c887d-6687-4aa5-a664-31cf6c810df7",
-                        vipCardNumber = "7210536159",
-                        dateOfBirth = "07/03/1964",
-                        remainingDailyDeposit = 999.99,
-                        walletBalance = 1000.0,
-                        transactionID = UUID.randomUUID().toString().replace("-", "").substring(1..24),
-                        transactionAmount = amount,
-                        transactionType = if (mode == "deposit") 0 else 1,
-                        returnURL = redirectUrl,
-                        productType = "preferred",
-                        androidPackageName = packageName,
-                    )
+                    val payload = when (ProductType.fromString(productType)) {
+                        ProductType.Online ->
+                            ExistingPatronRequestDto(
+                                patronType = patronType,
+                                patronID = "cb7c887d-6687-4aa5-a664-31cf6c810df7",
+                                vipCardNumber = "7210536159", // online
+                                dateOfBirth = "07/03/1964",
+                                remainingDailyDeposit = 999.99,
+                                walletBalance = 1000.0,
+                                transactionID = UUID.randomUUID().toString().replace("-", "")
+                                    .substring(1..24),
+                                transactionAmount = amount,
+                                transactionType = if (mode == "deposit") 0 else 1,
+                                returnURL = redirectUrl,
+                                productType = productType,
+                                androidPackageName = packageName,
+                            )
+
+                        ProductType.Preferred ->
+                            ExistingPatronRequestDto(
+                                patronType = patronType,
+                                patronID = "1ef56720-47b6-46bc-9a3a-b11bd511d10b",
+                                vipCardNumber = "7210908875", // preferred
+                                dateOfBirth = "11/13/1994",
+                                remainingDailyDeposit = 5000.0,
+                                walletBalance = 24.0,
+                                transactionID = UUID.randomUUID().toString().replace("-", "")
+                                    .substring(1..24),
+                                transactionAmount = amount,
+                                transactionType = if (mode == "deposit") 0 else 1,
+                                returnURL = redirectUrl,
+                                productType = productType,
+                                androidPackageName = packageName,
+                            )
+                    }
                     pavilionService.initializePatronSession(
+                        productType = productType,
                         patronType = patronType,
                         mode = mode,
                         existingUserSessionRequest = payload,

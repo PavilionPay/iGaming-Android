@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ExistingPatronRequestDto(
+    val patronType: String,
     val patronID: String,
     val vipCardNumber: String,
     val dateOfBirth: String,

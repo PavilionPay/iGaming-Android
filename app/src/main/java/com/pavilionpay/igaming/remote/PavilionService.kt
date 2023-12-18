@@ -24,13 +24,23 @@ interface PavilionService {
      * This function will make a network call to initialize the patron session and return [Resource.Success] or [Resource.Error]
      * with the URL to finish the deposit. This is for a new user.
      */
-    suspend fun initializePatronSession(patronType: String, mode: String, newUserSessionRequest: NewUserSessionRequestDto): Resource<PatronResponseDto>
+    suspend fun initializePatronSession(
+        productType: String,
+        patronType: String,
+        mode: String,
+        newUserSessionRequest: NewUserSessionRequestDto,
+    ): Resource<PatronResponseDto>
 
     /**
      * This function will make a network call to initialize the patron session and return [Resource.Success] or [Resource.Error]
      * with the URL to finish the deposit. This is for an existing user.
      */
-    suspend fun initializePatronSession(patronType: String, mode: String, existingUserSessionRequest: ExistingPatronRequestDto): Resource<PatronResponseDto>
+    suspend fun initializePatronSession(
+        productType: String,
+        patronType: String,
+        mode: String,
+        existingUserSessionRequest: ExistingPatronRequestDto,
+    ): Resource<PatronResponseDto>
 
     companion object {
         /**

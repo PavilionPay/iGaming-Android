@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pavilionpay.igaming.di.AppModule
+import com.pavilionpay.igaming.domain.ProductType
 import com.pavilionpay.igaming.presentation.viewModelFactory
 import java.text.NumberFormat
 
@@ -46,6 +47,7 @@ fun LandingScreen(
         factory = viewModelFactory { appModule.pavilionPlaidViewModel },
     )
 
+    var productType by remember { mutableStateOf(ProductType.Online.toString()) }
     var transactionAmount by remember { mutableDoubleStateOf(13.50) }
     var transactionType by remember { mutableStateOf("deposit") }
     var patronType by remember { mutableStateOf("new") }
@@ -77,47 +79,66 @@ fun LandingScreen(
 
         ConstraintLayout {
             val (
+                textProductTypeRef,
                 textType,
                 textAmount,
                 textUser,
-                radioTransaction,
-                fieldAmount,
-                radioPatron,
+                productTypeRef,
+                transactionRef,
+                amountRef,
+                patronTypeRef,
             ) = createRefs()
 
+            Text(
+                text = "Product Type",
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.constrainAs(textProductTypeRef) {
+                    start.linkTo(parent.start)
+                    baseline.linkTo(productTypeRef.baseline)
+                },
+            )
             Text(
                 text = "Type",
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.constrainAs(textType) {
-                    top.linkTo(parent.top)
-                    baseline.linkTo(radioTransaction.baseline)
-                    end.linkTo(textAmount.end)
+                    baseline.linkTo(transactionRef.baseline)
+                    end.linkTo(textProductTypeRef.end)
                 },
             )
             Text(
                 text = "Amount",
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.constrainAs(textAmount) {
-                    start.linkTo(parent.start)
-                    baseline.linkTo(fieldAmount.baseline)
+                    baseline.linkTo(amountRef.baseline)
+                    end.linkTo(textProductTypeRef.end)
                 },
             )
             Text(
                 text = "User",
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.constrainAs(textUser) {
-                    baseline.linkTo(radioPatron.baseline)
-                    end.linkTo(textAmount.end)
+                    baseline.linkTo(patronTypeRef.baseline)
+                    end.linkTo(textProductTypeRef.end)
                 },
             )
 
             RadioButtons(
-                items = mapOf("Deposit" to "deposit", "Withdrawal" to "withdraw"),
-                defaultSelect = transactionType,
-                onSelect = { transactionType = it },
-                modifier = Modifier.constrainAs(radioTransaction) {
-                    start.linkTo(textType.end)
+                items = mapOf("Online" to ProductType.Online.toString(), "Preferred" to ProductType.Preferred.toString()),
+                defaultSelect = productType,
+                onSelect = { productType = it },
+                modifier = Modifier.constrainAs(productTypeRef) {
+                    start.linkTo(textProductTypeRef.end)
                     top.linkTo(parent.top)
+                },
+            )
+
+            RadioButtons(
+                items = mapOf("Deposit" to "deposit", "Withdraw" to "withdraw"),
+                defaultSelect = transactionType,
+                onSelect = { transactionType = it.toString() },
+                modifier = Modifier.constrainAs(transactionRef) {
+                    start.linkTo(textType.end)
+                    top.linkTo(productTypeRef.bottom)
                 },
             )
 
@@ -125,9 +146,9 @@ fun LandingScreen(
             OutlinedTextField(
                 modifier = Modifier
                     .padding(start = 8.dp)
-                    .constrainAs(fieldAmount) {
+                    .constrainAs(amountRef) {
                         start.linkTo(textAmount.end)
-                        top.linkTo(radioTransaction.bottom)
+                        top.linkTo(transactionRef.bottom)
                         end.linkTo(parent.end)
                     },
                 value = format.format(transactionAmount),
@@ -147,10 +168,10 @@ fun LandingScreen(
             RadioButtons(
                 items = mapOf("New" to "new", "Existing" to "existing"),
                 defaultSelect = patronType,
-                onSelect = { patronType = it },
-                modifier = Modifier.constrainAs(radioPatron) {
+                onSelect = { patronType = it.toString() },
+                modifier = Modifier.constrainAs(patronTypeRef) {
                     start.linkTo(textUser.end)
-                    top.linkTo(fieldAmount.bottom)
+                    top.linkTo(amountRef.bottom)
                 },
             )
         }
@@ -162,6 +183,7 @@ fun LandingScreen(
             onClick = {
                 onCurrentScreenChange(NavigationScreens.PavilionPlaid)
                 viewModel.initializePatronSession(
+                    productType = productType,
                     patronType = patronType,
                     amount = transactionAmount.toFloat(),
                     mode = transactionType,
