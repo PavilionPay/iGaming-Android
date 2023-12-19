@@ -29,4 +29,5 @@ data class NewUserSessionRequestDto(
     val returnURL: String,
     val productType: String,
     val androidPackageName: String,
+    val transactionType: Int,
 )
