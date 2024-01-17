@@ -32,20 +32,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.pavilionpay.igaming.di.AppModule
+import com.pavilionpay.igaming.NavigationScreens
 import com.pavilionpay.igaming.domain.ProductType
-import com.pavilionpay.igaming.presentation.viewModelFactory
 import java.text.NumberFormat
 
 @Composable
 fun LandingScreen(
-    appModule: AppModule,
-    onCurrentScreenChange: (NavigationScreens) -> Unit,
+        viewModel: PavilionPlaidViewModel,
+        navigateTo: (NavigationScreens) -> Unit,
 ) {
-    val viewModel: PavilionPlaidViewModel = viewModel(
-        factory = viewModelFactory { appModule.pavilionPlaidViewModel },
-    )
 
     var productType by remember { mutableStateOf(ProductType.Online.toString()) }
     var transactionAmount by remember { mutableDoubleStateOf(13.50) }
@@ -54,8 +49,8 @@ fun LandingScreen(
 
     Column(
         modifier = Modifier
-            .padding(16.dp)
-            .fillMaxSize(),
+                .padding(16.dp)
+                .fillMaxSize(),
     ) {
         Text(
             text = "WELCOME",
@@ -135,7 +130,7 @@ fun LandingScreen(
             RadioButtons(
                 items = mapOf("Deposit" to "deposit", "Withdraw" to "withdraw"),
                 defaultSelect = transactionType,
-                onSelect = { transactionType = it.toString() },
+                onSelect = { transactionType = it },
                 modifier = Modifier.constrainAs(transactionRef) {
                     start.linkTo(textType.end)
                     top.linkTo(productTypeRef.bottom)
@@ -145,12 +140,12 @@ fun LandingScreen(
             val format = NumberFormat.getCurrencyInstance(java.util.Locale.US)
             OutlinedTextField(
                 modifier = Modifier
-                    .padding(start = 8.dp)
-                    .constrainAs(amountRef) {
-                        start.linkTo(textAmount.end)
-                        top.linkTo(transactionRef.bottom)
-                        end.linkTo(parent.end)
-                    },
+                        .padding(start = 8.dp)
+                        .constrainAs(amountRef) {
+                            start.linkTo(textAmount.end)
+                            top.linkTo(transactionRef.bottom)
+                            end.linkTo(parent.end)
+                        },
                 value = format.format(transactionAmount),
                 onValueChange = {
                     try {
@@ -168,7 +163,7 @@ fun LandingScreen(
             RadioButtons(
                 items = mapOf("New" to "new", "Existing" to "existing"),
                 defaultSelect = patronType,
-                onSelect = { patronType = it.toString() },
+                onSelect = { patronType = it },
                 modifier = Modifier.constrainAs(patronTypeRef) {
                     start.linkTo(textUser.end)
                     top.linkTo(amountRef.bottom)
@@ -181,7 +176,7 @@ fun LandingScreen(
         val context = LocalContext.current
         Button(
             onClick = {
-                onCurrentScreenChange(NavigationScreens.PavilionPlaid)
+                navigateTo(NavigationScreens.PavilionPlaid)
                 viewModel.initializePatronSession(
                     productType = productType,
                     patronType = patronType,
@@ -192,8 +187,8 @@ fun LandingScreen(
             },
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+                    .fillMaxWidth()
+                    .height(56.dp),
         ) {
             Text("Launch Pavilion Session")
         }
@@ -202,10 +197,10 @@ fun LandingScreen(
 
 @Composable
 private fun RadioButtons(
-    modifier: Modifier = Modifier,
-    items: Map<String, String>,
-    defaultSelect: String = items.values.first(),
-    onSelect: (String) -> Unit = {},
+        modifier: Modifier = Modifier,
+        items: Map<String, String>,
+        defaultSelect: String = items.values.first(),
+        onSelect: (String) -> Unit = {},
 ) {
     var selectedItem by remember { mutableStateOf(defaultSelect) }
     Row(

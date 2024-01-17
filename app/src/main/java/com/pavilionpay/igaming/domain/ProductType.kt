@@ -1,14 +1,10 @@
 package com.pavilionpay.igaming.domain
 
-sealed class ProductType(private val productType: String) {
-    object Preferred : ProductType("Preferred")
-    object Online : ProductType("Online") {
-        override fun equals(other: Any?): Boolean {
-            return super.equals(other)
-        }
-    }
+enum class ProductType(private val productTypeString: String) {
+    Preferred("Preferred"),
+    Online("Online");
 
-    override fun toString() = productType
+    override fun toString() = productTypeString
 
     companion object {
         fun fromString(productType: String): ProductType {

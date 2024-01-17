@@ -1,22 +1,24 @@
 package com.pavilionpay.igaming.presentation.screens
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.pavilionpay.igaming.di.AppModule
-import com.pavilionpay.igaming.presentation.viewModelFactory
+import com.pavilionpay.igaming.NavigationScreens
 import com.pavilionpay.igamingkit.PavilionPlaidWebView
 
 @Composable
 fun PavilionPlaidScreen(
-    appModule: AppModule,
-    onCurrentScreenChange: (NavigationScreens) -> Unit,
+        viewModel: PavilionPlaidViewModel,
+        navigateTo: (NavigationScreens) -> Unit,
 ) {
-    val viewModel: PavilionPlaidViewModel = viewModel(
-        factory = viewModelFactory { appModule.pavilionPlaidViewModel },
-    )
-
     val patronSessionUrls by viewModel.patronSessionUrlState.collectAsStateWithLifecycle()
 
     if (patronSessionUrls.patronSessionUrl.isNotBlank()) {
@@ -25,8 +27,17 @@ fun PavilionPlaidScreen(
             redirectUrl = patronSessionUrls.patronSessionRedirectUrl,
             onClose = {
                 viewModel.clearPatronSession()
-                onCurrentScreenChange(NavigationScreens.Landing)
+                navigateTo(NavigationScreens.Landing)
             },
         )
+    } else {
+        Surface {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(Modifier.size(40.dp))
+            }
+        }
     }
 }

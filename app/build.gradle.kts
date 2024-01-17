@@ -26,11 +26,9 @@ android {
 
     buildTypes {
         debug {
-            val properties = Properties()
             val propertiesFile = project.rootProject.file("local.properties")
             if (propertiesFile.exists()) {
-                properties.load(project.rootProject.file("local.properties").inputStream())
-                localPropertiesConfig(properties)
+                localPropertiesConfig(Properties().apply { load(propertiesFile.inputStream()) })
             }
         }
         release {
@@ -96,10 +94,6 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-
-    val appCenterSdkVersion = "4.4.5"
-    implementation("com.microsoft.appcenter:appcenter-analytics:$appCenterSdkVersion")
-    implementation("com.microsoft.appcenter:appcenter-crashes:$appCenterSdkVersion")
 }
 
 fun ApplicationBuildType.localPropertiesConfig(properties: Properties) {
@@ -123,11 +117,6 @@ fun ApplicationBuildType.localPropertiesConfig(properties: Properties) {
         name = "REDIRECT_URL",
         value = "\"${properties.getProperty("REDIRECT_URL")}\"",
     )
-    buildConfigField(
-        type = "String",
-        name = "APP_CENTER_SECRET",
-        value = "\"${properties.getProperty("APP_CENTER_SECRET")}\"",
-    )
 }
 
 fun ApplicationBuildType.envVarPropertiesConfig() {
@@ -150,10 +139,5 @@ fun ApplicationBuildType.envVarPropertiesConfig() {
         type = "String",
         name = "REDIRECT_URL",
         value = "\"${System.getenv("REDIRECT_URL")}\"",
-    )
-    buildConfigField(
-        type = "String",
-        name = "APP_CENTER_SECRET",
-        value = "\"${System.getenv("APP_CENTER_SECRET")}\"",
     )
 }

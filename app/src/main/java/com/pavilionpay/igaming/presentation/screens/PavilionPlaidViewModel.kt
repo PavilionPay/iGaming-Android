@@ -4,12 +4,12 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pavilionpay.igaming.BuildConfig
-import com.pavilionpay.igaming.core.Resource
 import com.pavilionpay.igaming.domain.ProductType
 import com.pavilionpay.igaming.remote.ExistingPatronRequestDto
 import com.pavilionpay.igaming.remote.HttpRoutes
 import com.pavilionpay.igaming.remote.NewUserSessionRequestDto
 import com.pavilionpay.igaming.remote.PavilionService
+import com.pavilionpay.igaming.remote.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,18 +18,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
 
-class PavilionPlaidViewModel(
-    private val pavilionService: PavilionService,
-) : ViewModel() {
+class PavilionPlaidViewModel : ViewModel() {
     private val _patronSessionUrlState = MutableStateFlow(PavilionPlaidState())
     val patronSessionUrlState: StateFlow<PavilionPlaidState> = _patronSessionUrlState
 
+    private val pavilionService = PavilionService()
+
     fun initializePatronSession(
-        productType: String,
-        patronType: String,
-        amount: Float,
-        mode: String,
-        packageName: String,
+            productType: String,
+            patronType: String,
+            amount: Float,
+            mode: String,
+            packageName: String,
     ) {
         viewModelScope.launch {
             val url = queryServiceForSession(
@@ -39,27 +39,27 @@ class PavilionPlaidViewModel(
                 mode = mode,
                 packageName = packageName,
             )
-            _patronSessionUrlState.update {
-                it.copy(
+            _patronSessionUrlState.tryEmit(
+                PavilionPlaidState(
                     patronSessionUrl = url ?: "",
                     patronSessionRedirectUrl = if (url.isNullOrBlank()) "" else redirectUrl,
                 )
-            }
+            )
         }
     }
 
     private suspend fun queryServiceForSession(
-        productType: String,
-        patronType: String,
-        amount: Float,
-        mode: String,
-        packageName: String,
+            productType: String,
+            patronType: String,
+            amount: Float,
+            mode: String,
+            packageName: String,
     ): String? {
         // Implement your logic to load Pavilion SDK and return the URL
         return withContext(Dispatchers.IO) {
-            val patronResponseDtoResult = when (patronType) {
+            val payload: Any = when (patronType) {
                 "new" -> {
-                    val payload = NewUserSessionRequestDto(
+                    NewUserSessionRequestDto(
                         city = "prZYfAYqa",
                         country = "USA",
                         dateOfBirth = "07/03/1964",
@@ -87,15 +87,10 @@ class PavilionPlaidViewModel(
                         patronType = patronType,
                         productType = productType,
                     )
-                    pavilionService.initializePatronSession(
-                        productType = productType,
-                        patronType = patronType,
-                        mode = mode,
-                        newUserSessionRequest = payload,
-                    )
                 }
+
                 "existing" -> {
-                    val payload = when (ProductType.fromString(productType)) {
+                    when (ProductType.fromString(productType)) {
                         ProductType.Online ->
                             ExistingPatronRequestDto(
                                 patronType = patronType,
@@ -105,7 +100,7 @@ class PavilionPlaidViewModel(
                                 remainingDailyDeposit = 999.99,
                                 walletBalance = 1000.0,
                                 transactionID = UUID.randomUUID().toString().replace("-", "")
-                                    .substring(1..24),
+                                        .substring(1..24),
                                 transactionAmount = amount,
                                 transactionType = if (mode == "deposit") 0 else 1,
                                 returnURL = redirectUrl,
@@ -122,7 +117,7 @@ class PavilionPlaidViewModel(
                                 remainingDailyDeposit = 5000.0,
                                 walletBalance = 24.0,
                                 transactionID = UUID.randomUUID().toString().replace("-", "")
-                                    .substring(1..24),
+                                        .substring(1..24),
                                 transactionAmount = amount,
                                 transactionType = if (mode == "deposit") 0 else 1,
                                 returnURL = redirectUrl,
@@ -130,18 +125,14 @@ class PavilionPlaidViewModel(
                                 androidPackageName = packageName,
                             )
                     }
-                    pavilionService.initializePatronSession(
-                        productType = productType,
-                        patronType = patronType,
-                        mode = mode,
-                        existingUserSessionRequest = payload,
-                    )
                 }
+
                 else -> throw IllegalArgumentException("Invalid mode: $mode")
             }
+
+            val patronResponseDtoResult = pavilionService.initializePatronSession(patronType, payload)
             if (patronResponseDtoResult is Resource.Success) {
-                val result =
-                    "${HttpRoutes.BASE_URL}?mode=$mode&native=true&redirectUrl=$redirectUrl#${patronResponseDtoResult.data?.sessionId}"
+                val result = "${HttpRoutes.BASE_URL}?mode=$mode&native=true&redirectUrl=$redirectUrl#${patronResponseDtoResult.data?.sessionId}"
                 Log.d("PPI", result)
                 return@withContext result
             }
@@ -162,3 +153,8 @@ class PavilionPlaidViewModel(
 
     private val redirectUrl = BuildConfig.REDIRECT_URL
 }
+
+data class PavilionPlaidState(
+        val patronSessionUrl: String = "",
+        val patronSessionRedirectUrl: String = "",
+)
