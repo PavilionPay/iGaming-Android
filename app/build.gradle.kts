@@ -73,7 +73,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 
     implementation("com.plaid.link:sdk-core:4.0.0")
-    implementation("com.github.PavilionPay:iGamingKit-Android:0.0.7")
+    implementation("com.github.PavilionPay:iGamingKit-Android:0.0.8")
 
     val ktorVersion = "2.3.6"
     implementation("io.ktor:ktor-client-core:$ktorVersion")
