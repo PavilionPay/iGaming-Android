@@ -2,9 +2,9 @@
 
 This repository contains a sample application that demonstrates integration and use of the iGaming SDK for Android.
 
-Detailed instructions on how to integrate with the iGaming SDK for Android can be found in our [main documentation](https://ausenapccde03.azureedge.net/).
+Detailed instructions on how to integrate with the iGaming SDK for Android can be found in our [main documentation](https://developer.vippreferred.com/).
 
-API Reference can be found [here](https://pavilionpay.github.io/iGaming-Android/documentation/igamingkit/)
+API Reference can be found [here](https://pavilionpay.github.io/iGamingKit-Android/index.html)
 
 ## About the iGaming Demo Android Studio project
 
