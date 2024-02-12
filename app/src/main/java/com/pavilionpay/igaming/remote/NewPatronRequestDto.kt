@@ -3,7 +3,7 @@ package com.pavilionpay.igaming.remote
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class NewUserSessionRequestDto(
+data class NewPatronRequestDto(
     val patronType: String,
     val patronId: String,
     val firstName: String,
@@ -25,7 +25,7 @@ data class NewUserSessionRequestDto(
     val walletBalance: String,
     val remainingDailyDeposit: String,
     val transactionId: String,
-    val transactionAmount: Float,
+    val transactionAmount: Double,
     val returnURL: String,
     val productType: String,
     val androidPackageName: String,

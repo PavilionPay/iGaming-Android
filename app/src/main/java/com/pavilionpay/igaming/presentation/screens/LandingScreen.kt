@@ -18,13 +18,11 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -32,32 +30,26 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pavilionpay.igaming.NavigationScreens
-import com.pavilionpay.igaming.domain.ProductType
 import java.text.NumberFormat
 
 @Composable
 fun LandingScreen(
-        viewModel: PavilionPlaidViewModel,
+        viewModel: VIPSessionUrlViewModel,
         navigateTo: (NavigationScreens) -> Unit,
 ) {
 
-    var productType by remember { mutableStateOf(ProductType.Online.toString()) }
-    var transactionAmount by remember { mutableDoubleStateOf(13.50) }
-    var transactionType by remember { mutableStateOf("deposit") }
-    var patronType by remember { mutableStateOf("new") }
+    val productType = viewModel.productType.collectAsStateWithLifecycle().value
+    val transactionAmount = viewModel.amount.collectAsStateWithLifecycle().value
+    val transactionType = viewModel.transactionType.collectAsStateWithLifecycle().value
+    val patronType = viewModel.patronType.collectAsStateWithLifecycle().value
 
     Column(
         modifier = Modifier
                 .padding(16.dp)
                 .fillMaxSize(),
     ) {
-        Text(
-            text = "WELCOME",
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-        )
 
         Spacer(modifier = Modifier.height(4.dp))
 
@@ -118,9 +110,9 @@ fun LandingScreen(
             )
 
             RadioButtons(
-                items = mapOf("Online" to ProductType.Online.toString(), "Preferred" to ProductType.Preferred.toString()),
+                items = ProductType.entries.associateBy { it.name },
                 defaultSelect = productType,
-                onSelect = { productType = it },
+                onSelect = { viewModel.setProductType(it) },
                 modifier = Modifier.constrainAs(productTypeRef) {
                     start.linkTo(textProductTypeRef.end)
                     top.linkTo(parent.top)
@@ -128,9 +120,9 @@ fun LandingScreen(
             )
 
             RadioButtons(
-                items = mapOf("Deposit" to "deposit", "Withdraw" to "withdraw"),
+                items = TransactionType.entries.associateBy { it.name },
                 defaultSelect = transactionType,
-                onSelect = { transactionType = it },
+                onSelect = { viewModel.setTransactionType(it) },
                 modifier = Modifier.constrainAs(transactionRef) {
                     start.linkTo(textType.end)
                     top.linkTo(productTypeRef.bottom)
@@ -149,7 +141,7 @@ fun LandingScreen(
                 value = format.format(transactionAmount),
                 onValueChange = {
                     try {
-                        transactionAmount = it.replace("[^\\d.]".toRegex(), "").toDouble()
+                        viewModel.setAmount(it.replace("[^\\d.]".toRegex(), "").toDouble())
                     } catch (e: NumberFormatException) {
                         // Handle exception
                     }
@@ -161,9 +153,9 @@ fun LandingScreen(
                 ),
             )
             RadioButtons(
-                items = mapOf("New" to "new", "Existing" to "existing"),
+                items = PatronType.entries.associateBy { it.name },
                 defaultSelect = patronType,
-                onSelect = { patronType = it },
+                onSelect = { viewModel.setPatronType(it) },
                 modifier = Modifier.constrainAs(patronTypeRef) {
                     start.linkTo(textUser.end)
                     top.linkTo(amountRef.bottom)
@@ -173,17 +165,10 @@ fun LandingScreen(
 
         Spacer(modifier = Modifier.fillMaxHeight(.85f))
 
-        val context = LocalContext.current
         Button(
             onClick = {
                 navigateTo(NavigationScreens.PavilionPlaid)
-                viewModel.initializePatronSession(
-                    productType = productType,
-                    patronType = patronType,
-                    amount = transactionAmount.toFloat(),
-                    mode = transactionType,
-                    packageName = context.packageName,
-                )
+                viewModel.initializePatronSession()
             },
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
@@ -196,11 +181,11 @@ fun LandingScreen(
 }
 
 @Composable
-private fun RadioButtons(
+private fun <T> RadioButtons(
         modifier: Modifier = Modifier,
-        items: Map<String, String>,
-        defaultSelect: String = items.values.first(),
-        onSelect: (String) -> Unit = {},
+        items: Map<String, T>,
+        defaultSelect: T = items.values.first(),
+        onSelect: (T) -> Unit = {},
 ) {
     var selectedItem by remember { mutableStateOf(defaultSelect) }
     Row(

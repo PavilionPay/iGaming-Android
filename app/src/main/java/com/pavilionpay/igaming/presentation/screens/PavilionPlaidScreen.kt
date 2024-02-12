@@ -16,7 +16,7 @@ import com.pavilionpay.igamingkit.PavilionPlaidWebView
 
 @Composable
 fun PavilionPlaidScreen(
-        viewModel: PavilionPlaidViewModel,
+        viewModel: VIPSessionUrlViewModel,
         navigateTo: (NavigationScreens) -> Unit,
 ) {
     val patronSessionUrls by viewModel.patronSessionUrlState.collectAsStateWithLifecycle()

@@ -14,16 +14,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.pavilionpay.igaming.presentation.screens.EditUserScreen
 import com.pavilionpay.igaming.presentation.screens.LandingScreen
 import com.pavilionpay.igaming.presentation.screens.PavilionPlaidScreen
-import com.pavilionpay.igaming.presentation.screens.PavilionPlaidViewModel
+import com.pavilionpay.igaming.presentation.screens.VIPSessionUrlViewModel
 import com.pavilionpay.igaming.ui.theme.IGamingTheme
 
 @Composable
 fun App(
-        viewModel: PavilionPlaidViewModel,
+        viewModel: VIPSessionUrlViewModel,
         darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
         dynamicColor: Boolean = true
 ) {
     IGamingTheme(
@@ -47,6 +47,7 @@ fun App(
                         when (screen) {
                             NavigationScreens.Landing -> LandingScreen(viewModel) { currentScreen = it }
                             NavigationScreens.PavilionPlaid -> PavilionPlaidScreen(viewModel) { currentScreen = it }
+                            NavigationScreens.EditUser -> EditUserScreen(viewModel)
                         }
                     }
                 }
@@ -57,5 +58,6 @@ fun App(
 
 enum class NavigationScreens {
     Landing,
-    PavilionPlaid
+    PavilionPlaid,
+    EditUser
 }
