@@ -16,9 +16,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 /**
@@ -28,33 +27,33 @@ import java.util.UUID
  */
 class VIPSessionUrlViewModel(app: Application) : AndroidViewModel(app) {
     companion object {
-        val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.US)
+        val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy")
         val defaultNewUser = NewUser(
-            city = "prZYfAYqa",
-            country = "USA",
-            dateOfBirth = dateFormat.parse("07/03/1964")!!,
-            email = "8zN2Emyp@5JP6oEaZ.com",
+            patronId = "a25b5c17-6541-4890-a4c9-098c1c0ec226",
             firstName = "hello",
+            middleInitial = "M",
+            lastName = "frd",
+            dateOfBirth = LocalDate.of(1964, 7, 3),
+            email = "8zN2Emyp@5JP6oEaZ.com",
+            mobilePhone = "8434811326",
+            streetName = "28 NQqodHNdv",
+            city = "prZYfAYqa",
+            state = "AR",
+            zip = "282926017",
+            country = "USA",
+            idType = "SS",
             idNumber = "123746689",
             idState = "",
-            idType = "SS",
-            lastName = "frd",
-            mobilePhone = "8434811326",
-            patronId = "a25b5c17-6541-4890-a4c9-098c1c0ec226",
-            remainingDailyDeposit = "100",
-            state = "AR",
-            streetName = "28 NQqodHNdv",
-            zip = "282926017",
-            walletBalance = "100",
             accountNumber = "",
             routingNumber = "",
-            middleInitial = "M",
+            remainingDailyDeposit = 100.0,
+            walletBalance = 100.0,
         )
 
         val defaultOnlineUser = ExistingUser(
             patronId = "cb7c887d-6687-4aa5-a664-31cf6c810df7",
             vipCardNumber = "7210536159", // online
-            dateOfBirth = dateFormat.parse("07/03/1964")!!,
+            dateOfBirth = LocalDate.of(1964, 7, 3),
             remainingDailyDeposit = 999.99,
             walletBalance = 1000.0
         )
@@ -62,7 +61,7 @@ class VIPSessionUrlViewModel(app: Application) : AndroidViewModel(app) {
         val defaultPreferredUser = ExistingUser(
             patronId = "1ef56720-47b6-46bc-9a3a-b11bd511d10b",
             vipCardNumber = "7210908875", // preferred
-            dateOfBirth = dateFormat.parse("11/13/1994")!!,
+            dateOfBirth = LocalDate.of(1994, 11, 13),
             remainingDailyDeposit = 5000.0,
             walletBalance = 24.0,
         )
@@ -110,6 +109,10 @@ class VIPSessionUrlViewModel(app: Application) : AndroidViewModel(app) {
 
         _patronType.tryEmit(patronType)
         resetDefaultUser(newPatronType = patronType)
+    }
+
+    fun setCurrentUser(user: UserObject) {
+        _currentUser.tryEmit(user)
     }
 
     fun initializePatronSession() {
@@ -180,6 +183,8 @@ data class PavilionPlaidState(
 )
 
 interface UserObject {
+    val dateOfBirth: LocalDate
+
     fun toPatronRequest(
             patronType: PatronType,
             amount: Double,
@@ -194,7 +199,7 @@ data class NewUser(
         val firstName: String,
         val middleInitial: String,
         val lastName: String,
-        val dateOfBirth: Date,
+        override val dateOfBirth: LocalDate,
         val email: String,
         val mobilePhone: String,
         val streetName: String,
@@ -204,11 +209,11 @@ data class NewUser(
         val country: String,
         val idType: String,
         val idNumber: String,
-        val idState: String? = "",
+        val idState: String,
         val routingNumber: String,
         val accountNumber: String,
-        val walletBalance: String,
-        val remainingDailyDeposit: String
+        val walletBalance: Double,
+        val remainingDailyDeposit: Double
 ) : UserObject {
     override fun toPatronRequest(
             patronType: PatronType,
@@ -251,7 +256,7 @@ data class NewUser(
 data class ExistingUser(
         val patronId: String,
         val vipCardNumber: String,
-        val dateOfBirth: Date,
+        override val dateOfBirth: LocalDate,
         val remainingDailyDeposit: Double,
         val walletBalance: Double
 ) : UserObject {

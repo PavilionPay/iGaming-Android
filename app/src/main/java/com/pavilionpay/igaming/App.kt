@@ -47,7 +47,7 @@ fun App(
                         when (screen) {
                             NavigationScreens.Landing -> LandingScreen(viewModel) { currentScreen = it }
                             NavigationScreens.PavilionPlaid -> PavilionPlaidScreen(viewModel) { currentScreen = it }
-                            NavigationScreens.EditUser -> EditUserScreen(viewModel)
+                            NavigationScreens.EditUser -> EditUserScreen(viewModel) { currentScreen = NavigationScreens.Landing }
                         }
                     }
                 }
