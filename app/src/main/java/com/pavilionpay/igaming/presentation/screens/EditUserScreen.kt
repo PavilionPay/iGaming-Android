@@ -3,6 +3,7 @@
 package com.pavilionpay.igaming.presentation.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.FocusInteraction
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -38,16 +40,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import java.text.NumberFormat
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
+import java.util.Locale
 
 @Composable
 fun EditUserScreen(
@@ -180,7 +186,7 @@ fun EditUserView(currentUser: UserObject, patronType: PatronType, navigateUp: ()
                             textStyle = TextStyle(textAlign = TextAlign.Right),
                             interactionSource = remember {
                                 object : MutableInteractionSource {
-                                    override val interactions = MutableSharedFlow<Interaction>()
+                                    override val interactions = MutableSharedFlow<Interaction>(0, 16, BufferOverflow.DROP_OLDEST)
 
                                     override suspend fun emit(interaction: Interaction) {
                                         if (interaction is PressInteraction.Release) {
@@ -199,23 +205,15 @@ fun EditUserView(currentUser: UserObject, patronType: PatronType, navigateUp: ()
                     }
 
                     listItemRow("Remaining Daily Deposit") {
-                        OutlinedTextField(
-                            value = existingUser.remainingDailyDeposit.toString(),
-                            singleLine = true,
-                            onValueChange = { onEdit(remainingDailyDeposit = it.toDouble()) },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            textStyle = TextStyle(textAlign = TextAlign.Right)
-                        )
+                        MoneyTextField(doubleValue = existingUser.remainingDailyDeposit) {
+                            onEdit(remainingDailyDeposit = it)
+                        }
                     }
 
                     listItemRow("Wallet Balance") {
-                        OutlinedTextField(
-                            value = existingUser.walletBalance.toString(),
-                            singleLine = true,
-                            onValueChange = { onEdit(walletBalance = it.toDouble()) },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            textStyle = TextStyle(textAlign = TextAlign.Right)
-                        )
+                        MoneyTextField(doubleValue = existingUser.walletBalance) {
+                            onEdit(walletBalance = it)
+                        }
                     }
                 }
 
@@ -385,23 +383,15 @@ fun EditUserView(currentUser: UserObject, patronType: PatronType, navigateUp: ()
                     }
 
                     listItemRow("Remaining Daily Deposit") {
-                        OutlinedTextField(
-                            value = existingUser.remainingDailyDeposit.toString(),
-                            singleLine = true,
-                            onValueChange = { onEdit(remainingDailyDeposit = it.toDouble()) },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            textStyle = TextStyle(textAlign = TextAlign.Right)
-                        )
+                        MoneyTextField(doubleValue = existingUser.remainingDailyDeposit) {
+                            onEdit(remainingDailyDeposit = it)
+                        }
                     }
 
                     listItemRow("Wallet Balance") {
-                        OutlinedTextField(
-                            value = existingUser.walletBalance.toString(),
-                            singleLine = true,
-                            onValueChange = { onEdit(walletBalance = it.toDouble()) },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            textStyle = TextStyle(textAlign = TextAlign.Right)
-                        )
+                        MoneyTextField(doubleValue = existingUser.walletBalance) {
+                            onEdit(walletBalance = it)
+                        }
                     }
                 }
             }
@@ -446,6 +436,54 @@ fun LazyListScope.listItemRow(label: String, rightView: @Composable () -> Unit) 
             rightView()
         }
     }
+}
+
+@Composable
+fun MoneyTextField(
+        modifier: Modifier = Modifier,
+        doubleValue: Double,
+        onUpdate: (Double) -> Unit,
+) {
+    val editFormat = "%.2f"
+    val displayFormat = NumberFormat.getCurrencyInstance(Locale.US)
+
+    var doubleString by remember { mutableStateOf(displayFormat.format(doubleValue)) }
+
+    val localFocusManager = LocalFocusManager.current
+    OutlinedTextField(
+        modifier = modifier,
+        value = doubleString,
+        singleLine = true,
+        onValueChange = { doubleString = it },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        keyboardActions = KeyboardActions(onDone = { localFocusManager.clearFocus() }),
+        textStyle = TextStyle(textAlign = TextAlign.Right),
+        interactionSource = remember(doubleValue) {
+            object : MutableInteractionSource {
+                override val interactions = MutableSharedFlow<Interaction>(0, 16, BufferOverflow.DROP_OLDEST)
+
+                override suspend fun emit(interaction: Interaction) {
+                    if(interaction is FocusInteraction.Focus) {
+                        doubleString = editFormat.format(doubleValue)
+                    } else if (interaction is FocusInteraction.Unfocus) {
+                        doubleString = try {
+                            val doubleVal = doubleString.toDouble()
+                            onUpdate(doubleVal)
+                            displayFormat.format(doubleVal)
+                        } catch (e: NumberFormatException) {
+                            displayFormat.format(doubleValue)
+                        }
+                    }
+
+                    interactions.emit(interaction)
+                }
+
+                override fun tryEmit(interaction: Interaction): Boolean {
+                    return interactions.tryEmit(interaction)
+                }
+            }
+        }
+    )
 }
 
 @Preview

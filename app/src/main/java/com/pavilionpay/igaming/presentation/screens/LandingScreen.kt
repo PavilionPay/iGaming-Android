@@ -11,10 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,16 +22,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pavilionpay.igaming.NavigationScreens
-import java.text.NumberFormat
 
 @Composable
 fun LandingScreen(
@@ -130,28 +124,16 @@ fun LandingScreen(
                 },
             )
 
-            val format = NumberFormat.getCurrencyInstance(java.util.Locale.US)
-            OutlinedTextField(
+            MoneyTextField(
+                doubleValue = transactionAmount,
+                onUpdate = { viewModel.setAmount(it) },
                 modifier = Modifier
                         .padding(start = 8.dp)
                         .constrainAs(amountRef) {
                             start.linkTo(textAmount.end)
                             top.linkTo(transactionRef.bottom)
                             end.linkTo(parent.end)
-                        },
-                value = format.format(transactionAmount),
-                onValueChange = {
-                    try {
-                        viewModel.setAmount(it.replace("[^\\d.]".toRegex(), "").toDouble())
-                    } catch (e: NumberFormatException) {
-                        // Handle exception
-                    }
-                },
-                placeholder = { Text("Amount") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                textStyle = TextStyle(
-                    textAlign = TextAlign.Right,
-                ),
+                        }
             )
             RadioButtons(
                 items = PatronType.entries.associateBy { it.name },
