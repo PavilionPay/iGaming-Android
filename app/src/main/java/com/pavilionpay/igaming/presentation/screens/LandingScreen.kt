@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,18 +28,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pavilionpay.igaming.NavigationScreens
 
 @Composable
 fun LandingScreen(
         viewModel: VIPSessionUrlViewModel,
-        navigateTo: (NavigationScreens) -> Unit,
+        navigateToEditUser: () -> Unit,
+        navigateToFullView: () -> Unit,
+        navigateToCashierView: () -> Unit
 ) {
 
     val productType = viewModel.productType.collectAsStateWithLifecycle().value
     val transactionAmount = viewModel.amount.collectAsStateWithLifecycle().value
     val transactionType = viewModel.transactionType.collectAsStateWithLifecycle().value
+    val viewType = viewModel.viewType.collectAsStateWithLifecycle().value
     val patronType = viewModel.patronType.collectAsStateWithLifecycle().value
+
+    LaunchedEffect(key1 = viewModel.isFullScreenRequested) {
+        if (viewModel.isFullScreenRequested) {
+            viewModel.isFullScreenRequested = false
+            navigateToFullView()
+            viewModel.initializePatronSession(true)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -64,10 +75,12 @@ fun LandingScreen(
                 textProductTypeRef,
                 textType,
                 textAmount,
+                textViewType,
                 textUser,
                 productTypeRef,
                 transactionRef,
                 amountRef,
+                viewTypeRef,
                 patronTypeRef,
             ) = createRefs()
 
@@ -92,6 +105,14 @@ fun LandingScreen(
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.constrainAs(textAmount) {
                     baseline.linkTo(amountRef.baseline)
+                    end.linkTo(textProductTypeRef.end)
+                },
+            )
+            Text(
+                text = "View",
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.constrainAs(textViewType) {
+                    baseline.linkTo(viewTypeRef.baseline)
                     end.linkTo(textProductTypeRef.end)
                 },
             )
@@ -136,22 +157,32 @@ fun LandingScreen(
                         }
             )
             RadioButtons(
+                items = SDKViewType.entries.associateBy { it.name },
+                defaultSelect = viewType,
+                onSelect = { viewModel.setSdkViewType(it) },
+                modifier = Modifier.constrainAs(viewTypeRef) {
+                    start.linkTo(textViewType.end)
+                    top.linkTo(amountRef.bottom)
+                },
+            )
+            RadioButtons(
                 items = PatronType.entries.associateBy { it.name },
                 defaultSelect = patronType,
                 onSelect = { viewModel.setPatronType(it) },
                 modifier = Modifier.constrainAs(patronTypeRef) {
                     start.linkTo(textUser.end)
-                    top.linkTo(amountRef.bottom)
+                    top.linkTo(viewTypeRef.bottom)
                 },
             )
         }
 
         Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally) {
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Button(
                 onClick = {
-                    navigateTo(NavigationScreens.EditUser)
+                    navigateToEditUser()
                 },
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
@@ -166,7 +197,10 @@ fun LandingScreen(
 
         Button(
             onClick = {
-                navigateTo(NavigationScreens.PavilionPlaid)
+                when (viewType) {
+                    SDKViewType.Full -> navigateToFullView()
+                    else -> navigateToCashierView()
+                }
                 viewModel.initializePatronSession()
             },
             shape = RoundedCornerShape(8.dp),

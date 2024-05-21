@@ -1,12 +1,10 @@
 package com.pavilionpay.igaming.presentation.screens
 
-import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pavilionpay.igaming.BuildConfig
 import com.pavilionpay.igaming.remote.ExistingPatronRequestDto
-import com.pavilionpay.igaming.remote.HttpRoutes
 import com.pavilionpay.igaming.remote.NewPatronRequestDto
 import com.pavilionpay.igaming.remote.PavilionService
 import com.pavilionpay.igaming.remote.Resource
@@ -25,7 +23,7 @@ import java.util.UUID
  * This example gets a session url by passing preset mock user data to a Pavilion test endpoint;
  * other implementations may obtain session urls through other means.
  */
-class VIPSessionUrlViewModel(app: Application) : AndroidViewModel(app) {
+class VIPSessionUrlViewModel : ViewModel() {
     companion object {
         val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy")
         val defaultNewUser = NewUser(
@@ -79,11 +77,16 @@ class VIPSessionUrlViewModel(app: Application) : AndroidViewModel(app) {
     private val _amount = MutableStateFlow(15.toDouble())
     var amount = _amount.asStateFlow()
 
+    private val _viewType = MutableStateFlow(SDKViewType.Full)
+    var viewType = _viewType.asStateFlow()
+
     private val _patronType = MutableStateFlow(PatronType.New)
     var patronType = _patronType.asStateFlow()
 
     private val _currentUser = MutableStateFlow<UserObject>(defaultNewUser)
     val currentUser = _currentUser.asStateFlow()
+
+    var isFullScreenRequested = false
 
     private val pavilionService = PavilionService()
 
@@ -103,6 +106,10 @@ class VIPSessionUrlViewModel(app: Application) : AndroidViewModel(app) {
         _amount.tryEmit(amount)
     }
 
+    fun setSdkViewType(viewType: SDKViewType) {
+        _viewType.tryEmit(viewType)
+    }
+
     fun setPatronType(patronType: PatronType) {
         val oldPatronType = _patronType.value
         if (oldPatronType == patronType) return
@@ -115,7 +122,8 @@ class VIPSessionUrlViewModel(app: Application) : AndroidViewModel(app) {
         _currentUser.tryEmit(user)
     }
 
-    fun initializePatronSession() {
+    fun initializePatronSession(forceFullScreen: Boolean = false) {
+        clearPatronSession()
         viewModelScope.launch {
             // Implement your logic to load Pavilion SDK and return the URL
             val url = withContext(Dispatchers.IO) {
@@ -124,11 +132,12 @@ class VIPSessionUrlViewModel(app: Application) : AndroidViewModel(app) {
                     amount.value,
                     transactionType.value,
                     productType.value,
-                    getApplication<Application>().packageName
+                    BuildConfig.APPLICATION_ID
                 )
                 val patronResponseDtoResult = pavilionService.initializePatronSession<Any>(patronType.value.paramName, payload)
                 if (patronResponseDtoResult is Resource.Success) {
-                    val result = "${HttpRoutes.BASE_URL}?mode=${transactionType.value.paramName}&native=true&redirectUrl=${BuildConfig.REDIRECT_URL}#${patronResponseDtoResult.data?.sessionId}"
+                    val result =
+                        "${BuildConfig.BASE_URL}?mode=${transactionType.value.paramName}&native=true${if (!forceFullScreen && viewType.value == SDKViewType.Cashier) "&view=cashier" else ""}&redirectUrl=${BuildConfig.REDIRECT_URL}#${patronResponseDtoResult.data?.sessionId}"
                     Log.d("PPI", result)
                     return@withContext result
                 }
@@ -284,20 +293,22 @@ data class ExistingUser(
     }
 }
 
-@Suppress("unused")
 enum class ProductType {
     Online,
     Preferred
 }
 
-@Suppress("unused")
 enum class TransactionType(val paramName: String) {
     Deposit("deposit"),
     Withdrawal("withdraw")
 }
 
-@Suppress("unused")
 enum class PatronType(val paramName: String) {
     New("new"),
     Existing("existing")
+}
+
+enum class SDKViewType {
+    Full,
+    Cashier
 }

@@ -11,13 +11,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pavilionpay.igaming.NavigationScreens
 import com.pavilionpay.igamingkit.PavilionPlaidWebView
 
 @Composable
 fun PavilionPlaidScreen(
         viewModel: VIPSessionUrlViewModel,
-        navigateTo: (NavigationScreens) -> Unit,
+        navigateUp: () -> Unit,
 ) {
     val patronSessionUrls by viewModel.patronSessionUrlState.collectAsStateWithLifecycle()
 
@@ -25,9 +24,10 @@ fun PavilionPlaidScreen(
         PavilionPlaidWebView(
             url = patronSessionUrls.patronSessionUrl,
             redirectUrl = patronSessionUrls.patronSessionRedirectUrl,
+            onFullScreenRequested = {},
             onClose = {
                 viewModel.clearPatronSession()
-                navigateTo(NavigationScreens.Landing)
+                navigateUp()
             },
         )
     } else {

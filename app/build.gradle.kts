@@ -70,11 +70,11 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
-    implementation("androidx.navigation:navigation-compose:2.7.5")
+    implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 
     implementation("com.plaid.link:sdk-core:4.0.0")
-    implementation("com.github.PavilionPay:iGamingKit-Android:0.0.8")
+    implementation("com.github.PavilionPay:iGamingKit-Android:0.0.9")
 
     val ktorVersion = "2.3.6"
     implementation("io.ktor:ktor-client-core:$ktorVersion")
@@ -119,6 +119,11 @@ fun ApplicationBuildType.localPropertiesConfig(properties: Properties) {
         type = "String",
         name = "REDIRECT_URL",
         value = "\"${properties.getProperty("REDIRECT_URL")}\"",
+    )
+    buildConfigField(
+        type = "String",
+        name = "BASE_URL",
+        value = "\"${properties.getProperty("BASE_URL")}\"",
     )
 }
 
