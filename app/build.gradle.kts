@@ -148,4 +148,9 @@ fun ApplicationBuildType.envVarPropertiesConfig() {
         name = "REDIRECT_URL",
         value = "\"${System.getenv("REDIRECT_URL")}\"",
     )
+    buildConfigField(
+        type = "String",
+        name = "BASE_URL",
+        value = "\"${System.getenv("BASE_URL")}\"",
+    )
 }
