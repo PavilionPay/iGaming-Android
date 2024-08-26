@@ -1,6 +1,3 @@
-import com.android.build.api.dsl.ApplicationBuildType
-import java.util.Properties
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -8,12 +5,12 @@ plugins {
 }
 
 android {
-    namespace = "com.pavilionpay.igaming"
+    namespace = "com.pavilionpay.vipconnect"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.pavilionpay.igaming"
-        minSdk = 25
+        applicationId = "com.pavilionpay.vipconnect"
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -26,19 +23,13 @@ android {
 
     buildTypes {
         debug {
-            val propertiesFile = project.rootProject.file("local.properties")
-            if (propertiesFile.exists()) {
-                localPropertiesConfig(Properties().apply { load(propertiesFile.inputStream()) })
-            }
         }
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            envVarPropertiesConfig()
         }
     }
     compileOptions {
-        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -60,21 +51,17 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation("androidx.activity:activity-compose:1.8.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    implementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+    implementation("androidx.activity:activity-compose:1.9.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
+    implementation(platform("androidx.compose:compose-bom:2024.08.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
     implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
-
-    implementation("com.plaid.link:sdk-core:4.0.0")
-    implementation("com.github.PavilionPay:iGamingKit-Android:0.0.9")
 
     val ktorVersion = "2.3.6"
     implementation("io.ktor:ktor-client-core:$ktorVersion")
@@ -85,72 +72,8 @@ dependencies {
     implementation("io.ktor:ktor-client-auth:$ktorVersion")
 
     implementation("com.auth0:java-jwt:3.18.2")
-
     implementation("ch.qos.logback:logback-classic:1.2.5")
 
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
-}
-
-fun ApplicationBuildType.localPropertiesConfig(properties: Properties) {
-    buildConfigField(
-        type = "String",
-        name = "JWT_SECRET",
-        value = "\"${properties.getProperty("JWT_SECRET")}\"",
-    )
-    buildConfigField(
-        type = "String",
-        name = "JWT_ISSUER",
-        value = "\"${properties.getProperty("JWT_ISSUER")}\"",
-    )
-    buildConfigField(
-        type = "String",
-        name = "JWT_AUDIENCE",
-        value = "\"${properties.getProperty("JWT_AUDIENCE")}\"",
-    )
-    buildConfigField(
-        type = "String",
-        name = "REDIRECT_URL",
-        value = "\"${properties.getProperty("REDIRECT_URL")}\"",
-    )
-    buildConfigField(
-        type = "String",
-        name = "BASE_URL",
-        value = "\"${properties.getProperty("BASE_URL")}\"",
-    )
-}
-
-fun ApplicationBuildType.envVarPropertiesConfig() {
-    buildConfigField(
-        type = "String",
-        name = "JWT_SECRET",
-        value = "\"${System.getenv("JWT_SECRET")}\"",
-    )
-    buildConfigField(
-        type = "String",
-        name = "JWT_ISSUER",
-        value = "\"${System.getenv("JWT_ISSUER")}\"",
-    )
-    buildConfigField(
-        type = "String",
-        name = "JWT_AUDIENCE",
-        value = "\"${System.getenv("JWT_AUDIENCE")}\"",
-    )
-    buildConfigField(
-        type = "String",
-        name = "REDIRECT_URL",
-        value = "\"${System.getenv("REDIRECT_URL")}\"",
-    )
-    buildConfigField(
-        type = "String",
-        name = "BASE_URL",
-        value = "\"${System.getenv("BASE_URL")}\"",
-    )
 }
