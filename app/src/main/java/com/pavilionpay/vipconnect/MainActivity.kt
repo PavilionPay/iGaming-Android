@@ -23,12 +23,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +50,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 
+/**
+ * A simple Activity that shows a Landing view, and a fullscreen WebView hosing the VIP SDK.
+ * This app uses Compose to create its UI, but Compose is not a requirement for the VIP SDK.
+ * As long as you setup your WebView correctly, the SDK will load correctly inside it.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +70,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
                     var sessionUrl by remember { mutableStateOf("") }
+                    var showAlert by remember { mutableStateOf(false) }
 
                     NavHost(
                         navController = navController,
@@ -75,18 +83,37 @@ class MainActivity : ComponentActivity() {
                         builder = fun NavGraphBuilder.() {
 
                             // Landing screen view
+                            // When the Launch button is pressed, the VIPSessionUrlViewModel attempts to retrieve a valid session id,
+                            // and if successful will build the VIP SDK url for that session and navigate to the VIP SDK WebView screen
+                            // to launch that url.
                             composable(NavigationScreens.Landing.name) {
-                                LandingView(viewModel) {
-                                    if (it?.isNotEmpty() == true) {
-                                        sessionUrl = it
+                                LandingView(viewModel) { sessionId ->
+                                    if (sessionId?.isNotEmpty() == true) {
+                                        sessionUrl = viewModel.createVIPSessionUrl(sessionId)
                                         navController.navigate(NavigationScreens.VipSdk.name)
                                     } else {
-                                        //show alert
+                                        showAlert = true
                                     }
+                                }
+
+                                if (showAlert) {
+                                    AlertDialog(onDismissRequest = { showAlert = false },
+                                        confirmButton = {
+                                            TextButton(onClick = { showAlert = false }) {
+                                                Text("OK")
+                                            }
+                                        },
+                                        title = {
+                                            Text("Session Creation Failed")
+                                        },
+                                        text = {
+                                            Text("Could not create a valid session; please check your secret values in VIPSessionUrlViewModel.")
+                                        }
+                                    )
                                 }
                             }
 
-                            // SDK WebView
+                            // SDK WebView Screen
                             composable(NavigationScreens.VipSdk.name) {
                                 VipSdkView(sessionUrl) { navController.popBackStack() }
                             }
@@ -103,7 +130,47 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun LandingView(viewModel: VIPSessionUrlViewModel, setSessionUrl: (String?) -> Unit) {
+    fun VipSdkView(sessionUrl: String, navigateUp: () -> Unit) {
+        val context = LocalContext.current
+
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = {
+                // These steps are required to setup a VIP SDK WebView:
+                // 1. Create a WebViewClient that implements shouldOverrideUrlLoading and looks for navigation
+                //      to the value passed as `returnURL` during session creation. When that url is reached,
+                //      dismiss the WebView or navigate up.
+                // 2. Enabled JavaScript and DOM storage on the WebView, as the VIP SDK uses both of these features.
+                // 3. Load the VIP SDK launch url with a valid session id
+                WebView(context).apply {
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+
+                    webViewClient = object : WebViewClient() {
+                        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                            if (request?.url.toString().contains("closevip")) {
+                                navigateUp()
+                                return true
+                            }
+
+                            return false
+                        }
+                    }
+
+                    @SuppressLint("SetJavaScriptEnabled")
+                    settings.javaScriptEnabled = true
+                    settings.domStorageEnabled = true
+
+                    loadUrl(sessionUrl)
+                }
+            },
+        )
+    }
+
+    @Composable
+    fun LandingView(viewModel: VIPSessionUrlViewModel, setSessionId: (String?) -> Unit) {
         val scope = rememberCoroutineScope()
         var loading by remember { mutableStateOf(false) }
 
@@ -123,7 +190,7 @@ class MainActivity : ComponentActivity() {
                     onClick = {
                         scope.launch {
                             loading = true
-                            setSessionUrl(viewModel.getPatronSessionUrl())
+                            setSessionId(viewModel.getPatronSessionId())
                             loading = false
                         }
                     },
@@ -148,41 +215,6 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-    }
-
-    @Composable
-    fun VipSdkView(sessionUrl: String, navigateUp: () -> Unit) {
-        val context = LocalContext.current
-
-        AndroidView(
-            modifier = Modifier.fillMaxSize(),
-            factory = {
-                WebView(context).apply {
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
-
-                    webViewClient = object : WebViewClient() {
-                        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                            if (request?.url.toString().contains("closevip")) {
-                                navigateUp()
-                                return true
-                            }
-
-                            return false
-                        }
-                    }
-
-                    WebView.setWebContentsDebuggingEnabled(true)
-                    @SuppressLint("SetJavaScriptEnabled")
-                    settings.javaScriptEnabled = true
-                    settings.domStorageEnabled = true
-
-                    loadUrl(sessionUrl)
-                }
-            },
-        )
     }
 }
 

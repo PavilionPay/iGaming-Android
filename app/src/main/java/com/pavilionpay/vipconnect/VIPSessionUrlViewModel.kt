@@ -34,12 +34,18 @@ import java.util.UUID
  */
 class VIPSessionUrlViewModel : ViewModel() {
     companion object {
+
+        // You need to provide these values in order to run this demo app against your operator.
+        // These values were created when your Pavilion Operator account was created.
+        // Contact your Pavilion representative if you need help obtaining these values.
         const val JWT_ISSUER: String = <YOUR VALUE HERE>
         const val JWT_SECRET: String = <YOUR VALUE HERE>
         const val ENVIRONMENT: String = <YOUR VALUE HERE>
 
+
         val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy")
 
+        //
         val defaultPreferredUser = UserObject(
             patronId = "1ef56720-47b6-46bc-9a3a-b11bd511d10b",
             vipCardNumber = "7210908875", // preferred
@@ -47,8 +53,13 @@ class VIPSessionUrlViewModel : ViewModel() {
         )
     }
 
-    suspend fun getPatronSessionUrl(): String? {
-        // Implement your logic to load Pavilion SDK and return the URL
+    /**
+     * Retrieves a VIP Session id from a Pavilion test endpoint.
+     * This method is sufficient for the demo app, but your app should not connect to Pavilion's APIs directly;
+     * instead, you should create your own web services that hold your secret values and have your app
+     * connect to those.
+     */
+    suspend fun getPatronSessionId(): String? {
         val patronResponseDtoResult: PatronResponseDto? = try {
             client.post("https://$ENVIRONMENT.api-gaming.paviliononline.io/sdk/api/patronsession/existing") {
                 contentType(ContentType.Application.Json)
@@ -61,10 +72,19 @@ class VIPSessionUrlViewModel : ViewModel() {
         }
 
         if (patronResponseDtoResult != null) {
-            return "https://$ENVIRONMENT.api-gaming.paviliononline.io/sdk?mode=deposit#${patronResponseDtoResult.sessionId}"
+            return patronResponseDtoResult.sessionId
         }
 
         return null
+    }
+
+    /**
+     * Creates the url to launch a VIP SDK session.
+     * For more info on how to build this url, see
+     * https://developer.vippreferred.com/integration-steps/invoke-web-component#open-via-url
+     */
+    fun createVIPSessionUrl(sessionId: String): String {
+        return "https://$ENVIRONMENT.api-gaming.paviliononline.io/sdk?mode=deposit#$sessionId"
     }
 
     private val client: HttpClient = HttpClient {
