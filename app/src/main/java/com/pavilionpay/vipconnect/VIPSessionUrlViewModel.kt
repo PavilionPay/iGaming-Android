@@ -33,6 +33,7 @@ import java.util.UUID
  * other implementations will obtain session urls through accessing other services.
  */
 class VIPSessionUrlViewModel : ViewModel() {
+
     companion object {
 
         // You need to provide these values in order to run this demo app against your operator.
@@ -41,6 +42,9 @@ class VIPSessionUrlViewModel : ViewModel() {
         const val JWT_ISSUER: String = <YOUR VALUE HERE>
         const val JWT_SECRET: String = <YOUR VALUE HERE>
         const val ENVIRONMENT: String = <YOUR VALUE HERE>
+
+        // This url is arbitrary and you may change it to any value, but it must match the value in AndroidManifest.xml
+        const val RETURN_URL = "closevip://done"
 
 
         val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy")
@@ -161,7 +165,7 @@ data class UserObject(
             transactionID = UUID.randomUUID().toString().replace("-", "").substring(1..24),
             transactionAmount = 10.0,
             transactionType = 0,
-            returnURL = "closevip://done",
+            returnURL = VIPSessionUrlViewModel.RETURN_URL,
             productType = "0",
         )
     }

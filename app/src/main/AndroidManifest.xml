@@ -22,6 +22,17 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+<!--            The following scheme must match the return url that you supply to the VIP Connect-->
+<!--            session initialization call in order for the SDK to return to your app-->
+            <intent-filter>
+                <data android:scheme="closevip" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+
+
         </activity>
     </application>
 
