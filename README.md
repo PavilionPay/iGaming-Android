@@ -1,4 +1,4 @@
-# VIP Connect SDK integration on Android
+# VIP Connect SDK Integration for Android
 
 This repository contains a sample application that demonstrates integration and use of the VIP Connect SDK for Android.
 
