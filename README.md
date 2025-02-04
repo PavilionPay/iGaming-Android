@@ -22,7 +22,6 @@ the VIP Connect SDK inside a fullscreen WebView is necessary to provide the best
 ## Returning to the app from VIP Connect
 
 Upon completion or cancellation, VIP Connect will navigate to the address at the `returnURL` param passed during [session creation](https://developer.vippreferred.com/APIS/SDK/create-patron-session).
-For iOS, it is recommended that this parameter be set to a custom URL scheme; your Android app will likely use the same custom scheme for simplicity.
 Your WebView should implement a `WebViewClient` that overrides `shouldOverrideUrlLoading` and detects navigation to the custom url scheme. When the scheme
 is detected, the VIP SDK session is complete, and the WebView may dismiss or pop its navigation back to the previous screen. The demo app provides an example
 of this in the `VipConnectScreen` Composable function.
